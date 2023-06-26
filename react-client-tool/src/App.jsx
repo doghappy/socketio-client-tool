@@ -21,8 +21,9 @@ function App() {
   const [connData, setConnData] = useState({
     connected: false,
     loading: false,
-    server: 'http://localhost:8080',
+    server: 'http://localhost:11402',
     config: '{"path": "/socket.io", "forceNew": true, "reconnectionAttempts": 3, "timeout": 2000}',
+    parser: 'socket.io-msgpack-parser',
     errors: []
   });
 
@@ -30,14 +31,14 @@ function App() {
   const [eventsToListenFor, setEventsToListenFor] = useState(['socketio-client', 'message']);
 
   const [listenTo, setListenTo] = useState([]);
-  const [emitTo, setEmitTo] = useState(['socketio-client', 'socketio-client-ack']);
+  const [emitTo, setEmitTo] = useState(['1:emit', 'socketio-client', 'socketio-client-ack']);
 
   // Storage
   const [emitHistory, setEmitHistory] = useState([]);
   const [listenHistory, setListenHistory] = useState([]);
   const [ackHistory, setAckHistory] = useState([]);
 
-  const createConnection = (url, config) => {
+  const createConnection = (url, config, parser) => {
     setConnData(() => {
       return {
         connected: false,
@@ -45,10 +46,17 @@ function App() {
         socketId: 'connecting..',
         server: url,
         config: config,
+        parser: parser,
         errors: []
       }
     });
-    setSocket(() => io(url, JSON.parse(config)));
+    setSocket(() => {
+      var newConfig = JSON.parse(config);
+      if (parser === 'socket.io-msgpack-parser') {
+        newConfig.parser = require('socket.io-msgpack-parser');
+      }
+      return io(url, newConfig);
+    });
   }
 
   useEffect(() => {
@@ -67,6 +75,7 @@ function App() {
           server: connData.url,
           socketId: socket.id,
           config: connData.config,
+          parser: connData.parser,
           errors: []
         }
       });
@@ -180,7 +189,7 @@ function App() {
           return {
             connected: false,
             loading: false,
-            server: d.server,
+            server: d.server || connData.server,
             config: d.config,
             errors: []
           };
@@ -228,7 +237,7 @@ function App() {
         <Modal.Header>
           <Modal.Title>
             Configure connection
-            </Modal.Title>
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>

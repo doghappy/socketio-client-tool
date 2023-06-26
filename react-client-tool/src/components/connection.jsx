@@ -3,8 +3,9 @@ import { Form, Col, Button, Alert } from 'react-bootstrap';
 
 export default function Connection({ connData, createConnection, eventsToListenFor, emitTo }) {
   const [formValid, setFormValid] = useState([]);
-  const [serverUrl, setServerUrl] = useState([]);
-  const [config, setConfig] = useState();
+  const [serverUrl, setServerUrl] = useState('');
+  const [config, setConfig] = useState('');
+  const [parser, setParser] = useState('');
 
   const onFormSubmit = (e) => {
     e.preventDefault();
@@ -19,12 +20,13 @@ export default function Connection({ connData, createConnection, eventsToListenF
     }
 
     setFormValid(() => []);
-    createConnection(serverUrl, config);
+    createConnection(serverUrl, config, parser);
   }
 
   useEffect(() => {
     setConfig(() => connData.config);
     setServerUrl(() => connData.server);
+    setParser(() => connData.parser);
   }, [connData]);
 
   return (
@@ -42,6 +44,14 @@ export default function Connection({ connData, createConnection, eventsToListenF
         <Form.Row className="mb-2">
           <Col>
             <Form.Control as="textarea" placeholder="JSON config" value={config} onChange={(e) => setConfig(e.target.value)} />
+          </Col>
+        </Form.Row>  
+        <Form.Row className="mb-2">
+          <Col>
+            <Form.Control required as="select" placeholder="parser" value={parser} onChange={(e) => setParser(e.target.value)}>
+              <option>default parser</option>
+              <option>socket.io-msgpack-parser</option>
+            </Form.Control>
           </Col>
         </Form.Row>
         <Form.Row className="mt-2">

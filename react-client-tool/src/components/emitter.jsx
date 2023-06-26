@@ -3,9 +3,9 @@ import { Form, Col, Button, Alert } from 'react-bootstrap';
 import History from './history.jsx';
 
 export default function Emitter({ emitToChannels, addEmitTo, emitData, emitHistory, clearHistory, stack }) {
-  const [emitChannel, setEmitChannel] = useState('socketio-client');
+  const [emitChannel, setEmitChannel] = useState('1:emit');
   const [emitText, setEmitText] = useState('');
-  const [emitDataJson, setEmittDataJson] = useState(false);
+  const [emitDataType, setEmittDataType] = useState('');
   const [newEmitter, setNewEmitter] = useState('');
   const [emitFormErrors, setEmitFormErrors] = useState([]);
 
@@ -14,11 +14,17 @@ export default function Emitter({ emitToChannels, addEmitTo, emitData, emitHisto
 
     let dataToEmit = emitText;
 
-    if (emitDataJson === true) {
+    if (emitDataType === 'json') {
       try {
         dataToEmit = JSON.parse(emitText);
       } catch (error) {
-        // setEmitFormErrors((items) => [...items, `Failed to parse JSON data: ${error}`]);
+        setEmitFormErrors(() => [`Failed to parse JSON data: ${error}`]);
+        return;
+      }
+    } else if(emitDataType === 'binary'){
+      try {
+        dataToEmit = new Uint8Array([104, 101, 108, 108, 111]).buffer//new Blob([emitText], { type : 'plain/text' }) //Buffer.from(emitText, 'utf8');
+      } catch (error) {
         setEmitFormErrors(() => [`Failed to parse JSON data: ${error}`]);
         return;
       }
@@ -67,7 +73,12 @@ export default function Emitter({ emitToChannels, addEmitTo, emitData, emitHisto
             </Form.Control>
           </Col>
           <Col>
-            <Form.Check type="switch" id="is-json" label="JSON data" value={emitDataJson} onChange={(e) => setEmittDataJson(() => e.target.checked)} placeholder="data..." className="pt-3 pl-5" />
+            {/* <Form.Check type="switch" id="is-json" label="JSON data" value={emitDataJson} onChange={(e) => setEmittDataJson(() => e.target.checked)} placeholder="data..." className="pt-3 pl-5" /> */}
+            <Form.Control required as="select" placeholder="parser" value={emitDataType} onChange={(e) => setEmittDataType(e.target.value)}>
+              <option>text</option>
+              <option>json</option>
+              <option>binary</option>
+            </Form.Control>
           </Col>
         </Form.Row>
         <Form.Row className="mb-2">
