@@ -4,7 +4,7 @@ import Listen from './components/listen.jsx';
 import Emitter from './components/emitter.jsx';
 import Ack from './components/ack.jsx';
 import { useEffect, useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client';
 import { Container, Row, Col, Modal, Tabs, Tab } from 'react-bootstrap';
 import { MdCloudDone, MdCloudOff } from 'react-icons/md';
 
@@ -21,7 +21,7 @@ function App() {
   const [connData, setConnData] = useState({
     connected: false,
     loading: false,
-    server: 'http://localhost:11402',
+    server: 'http://localhost:11202',
     config: '{"path": "/socket.io", "forceNew": true, "reconnectionAttempts": 3, "timeout": 2000}',
     parser: 'socket.io-msgpack-parser',
     errors: []
